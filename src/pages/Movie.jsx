@@ -1,57 +1,43 @@
-import React, { useRef } from "react";
-import MuiCard from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
-import Typography from "@mui/material/Typography";
+/* eslint-disable react-hooks/set-state-in-effect */
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import MovieCard from "../components/MovieCard";
 
-function MovieCard({ movieData }) {
-  const imageRef = useRef(null);
+function Movie() {
+  const [data, setData] = useState([]);
 
-  const handleEnter = () => {
-    imageRef.current.style.transform =
-      "translateY(0) rotateX(0deg) scale(1)";
-    imageRef.current.style.opacity = "1";
+  const API = "https://www.omdbapi.com/?apikey=1c12799f&s=titanic&page=1";
+
+  const getMovieData = async () => {
+    try {
+      const res = await axios.get(API);
+      console.log(res);
+      setData(res.data?.Search || []); // safe handling
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const handleLeave = () => {
-    imageRef.current.style.transform =
-      "translateY(-120%) rotateX(45deg) scale(0.8)";
-    imageRef.current.style.opacity = "0";
-  };
+  useEffect(() => {
+    getMovieData();
+  }, []);
 
   return (
-    <MuiCard
-      onMouseEnter={handleEnter}
-      onMouseLeave={handleLeave}
-      className="drop-card"
-      sx={{
-        width: 300,
-        height: 420,
-        borderRadius: 3,
-        background: "#111",
-        perspective: "1200px",
-        position: "relative",
-        overflow: "visible",
-        boxShadow: "0 6px 18px rgba(0,0,0,0.35)",
-        cursor: "pointer",
+    <ul
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: "20px",
+        listStyle: "none",
+        padding: 0,
+        justifyContent: "center",
       }}
     >
-      <CardMedia
-        component="img"
-        image={movieData.Poster}
-        alt={movieData.Title}
-        ref={imageRef}
-        className="drop-image"
-      />
-
-      <CardContent sx={{ textAlign: "center", color: "white" }}>
-        <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          {movieData.Title}
-        </Typography>
-        <Typography variant="body2">{movieData.Year}</Typography>
-      </CardContent>
-    </MuiCard>
+      {data?.map((m) => (
+        <MovieCard key={m.imdbID} movieData={m} />
+      ))}
+    </ul>
   );
 }
 
-export default MovieCard;
+export default Movie;
